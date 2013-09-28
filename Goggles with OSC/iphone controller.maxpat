@@ -275,6 +275,7 @@
 					"outlettype" : [ "", "" ],
 					"parameter_enable" : 0,
 					"patching_rect" : [ 728.5, 226.0, 150.0, 140.0 ],
+					"setminmax" : [ -2.0, 0.0 ],
 					"setstyle" : 2
 				}
 
@@ -329,7 +330,7 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "" ],
 					"patching_rect" : [ 660.0, 76.0, 413.0, 26.0 ],
-					"text" : "/accxyz 0.039948 -0.011963 -0.996933"
+					"text" : "/accxyz 0.041138 -0.015915 -0.997803"
 				}
 
 			}
