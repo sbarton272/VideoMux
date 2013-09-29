@@ -4,16 +4,16 @@ import collections
 from numpy import mean
 
 SLEEP_TIME = 1
-SAMPLE_TIME = 10
+SAMPLE_TIME = 50
 MAX_VIDEO = 8
-WINDOW_SIZE = 10
+WINDOW_SIZE = 50
 
 # tupple with ip, port
-receive_address = ('192.168.1.103', 5005)
+receive_address = ('128.237.167.128', 5005)
 
 samples = 0
 
-SER_PORT = 8 # COM 9
+SER_PORT = 9 # COM 10
 SER_BAUD = 9600
 SER_TIMEOUT = 3 # sec
 MAXLINE = 32
@@ -44,6 +44,7 @@ try:
     ser.open()
 except:
     print "Ardunio not connected"
+    exit(0)
 
 # cycle video with ardunio
 def cycleVideo():
@@ -72,6 +73,10 @@ def cycleVideo():
     # write to ardunio
     if (ser.isOpen()):
         ser.write(currentVideo)
+        # print ser.readline()
+    else:
+        print "Serial disconnected"
+        exit(0)
 
 # define a message-handler function for the server to call.
 def accel_handler(addr, tags, stuff, source):
