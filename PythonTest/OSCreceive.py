@@ -1,7 +1,8 @@
+"Depends on pySerial and OSC (included)"
+
 import OSC, serial
 import time, threading
 import collections
-from numpy import mean
 
 # tupple with ip, port
 receiveAddress = ('128.237.167.128', 5008)
@@ -92,13 +93,13 @@ class VideoMux(object):
             self.ser.open()
         except:
             print "Ardunio not connected. Exiting"
-            #exit(0)
+            exit(0)
 
     def cycleVideo(self):
         "cylce video on the ardunio by sending it the channel"
 
         # take mean to reduce noise
-        self.xVal = mean(self.xData)
+        self.xVal = self.mean(self.xData)
         print self.xVal
 
         self.determineChannel()
@@ -107,10 +108,10 @@ class VideoMux(object):
 
         # write to ardunio
         if (self.ser.isOpen()):
-            self.ser.write(currentVideo)
+            self.ser.write(self.currentVideo)
         else:
             print "Serial disconnected"
-            #exit(0)
+            exit(0)
 
     def determineChannel(self):
         "determine which channel to send to ardunio"
@@ -129,6 +130,10 @@ class VideoMux(object):
             currentVideo = self.MAX_VIDEO-1
 
         self.currentVideo = currentVideo
+
+    def mean(self, data):
+        l = list(data)
+        return sum(l)/len(l)
 
 
 # Run the script
