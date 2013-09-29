@@ -1,15 +1,3 @@
-
-""" receiving OSC with pyOSC
-https://trac.v2.nl/wiki/pyOSC
-example by www.ixi-audio.net based on pyOSC documentation
-
-this is a very basic example, for detailed info on pyOSC functionality check the OSC.py file 
-or run pydoc pyOSC.py. you can also get the docs by opening a python shell and doing
->>> import OSC
->>> help(OSC)
-"""
-
-
 import OSC, serial
 import time, threading
 import collections

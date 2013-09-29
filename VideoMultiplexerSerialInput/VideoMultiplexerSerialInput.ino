@@ -48,27 +48,6 @@ void loop() {
     chooseVideoOutput(channel);
   }
 
-
-  /*
-  chooseVideoOutput(0,0,0);
-   delay(delayTime);                  // wait for a second
-   
-   chooseVideoOutput(0,0,1);
-   delay(delayTime);                  
-   chooseVideoOutput(0,1,0);
-   delay(delayTime);                  
-   chooseVideoOutput(0,1,1);
-   delay(delayTime);                  
-   chooseVideoOutput(1,0,0);
-   delay(delayTime);                  
-   chooseVideoOutput(1,0,1);
-   delay(delayTime);                  
-   chooseVideoOutput(1,1,0);
-   delay(delayTime);                  
-   chooseVideoOutput(1,1,1);
-   delay(delayTime);
-   */
-
 }
 
 int chooseVideoOutput(int channel){
@@ -88,13 +67,6 @@ int chooseVideoOutput(int channel){
   setPinMode(pinS0, S0);
   setPinMode(pinS1, S1);
   setPinMode(pinS2, S2);
-
-//  Serial.print(S0);
-//  Serial.print(',');
-//  Serial.print(S1);
-//  Serial.print(',');
-//  Serial.print(S2);
-//  Serial.print('\n');
 
 }
 
