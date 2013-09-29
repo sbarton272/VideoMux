@@ -29,6 +29,7 @@ void setup() {
   chooseVideoOutput(0);
 
   Serial.begin(9600);
+  Serial.println("Online");
 }
 
 // the loop() methor runs over and over again,
