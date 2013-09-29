@@ -100,7 +100,6 @@ class VideoMux(object):
 
         # take mean to reduce noise
         self.xVal = self.mean(self.xData)
-        print self.xVal
 
         self.determineChannel()
 
