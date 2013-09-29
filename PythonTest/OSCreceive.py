@@ -3,125 +3,134 @@ import time, threading
 import collections
 from numpy import mean
 
-SLEEP_TIME = 1
-SAMPLE_TIME = 50
-MAX_VIDEO = 8
-WINDOW_SIZE = 50
-
 # tupple with ip, port
-receive_address = ('128.237.167.128', 5005)
+receiveAddress = ('128.237.167.128', 5008)
+ardunioPort = 9 # COM 10
 
-samples = 0
+videoMux = object()
 
-SER_PORT = 9 # COM 10
-SER_BAUD = 9600
-SER_TIMEOUT = 3 # sec
-MAXLINE = 32
-THRESHOLD = .25
-
-# List to store accelerometer data
-xData = collections.deque(maxlen=WINDOW_SIZE)
-
-currentVideo = 0
-
-
-# OSC Server. there are three different types of server. 
-s = OSC.OSCServer(receive_address) # basic
-##s = OSC.ThreadingOSCServer(receive_address) # threading
-##s = OSC.ForkingOSCServer(receive_address) # forking
-
-# this registers a 'default' handler (for unmatched messages), 
-# an /'error' handler, an '/info' handler.
-# And, if the client supports it, a '/subscribe' & '/unsubscribe' handler
-s.addDefaultHandlers()
-
-# Arduino Serial Com
-ser = serial.Serial()
-ser.baudrate = SER_BAUD
-ser.port = SER_PORT
-ser.timeout = SER_TIMEOUT
-try:
-    ser.open()
-except:
-    print "Ardunio not connected"
-    exit(0)
-
-# cycle video with ardunio
-def cycleVideo():
-    global currentVideo # horrible thing to do
-
-    xVal = mean(xData)
-    #print xVal
-
-    inc = 0
-
-    # decide increment up/down for video
-    if (xVal >= THRESHOLD):
-        inc = 1
-    if (xVal <= -THRESHOLD):
-        inc = -1
-
-    currentVideo += inc
-    # loop back around
-    if (currentVideo >= MAX_VIDEO): 
-        currentVideo = 0
-    elif (currentVideo < 0):
-        currentVideo = MAX_VIDEO-1
-
-    print "Current Video:", currentVideo
-
-    # write to ardunio
-    if (ser.isOpen()):
-        ser.write(currentVideo)
-        # print ser.readline()
-    else:
-        print "Serial disconnected"
-        exit(0)
-
-# define a message-handler function for the server to call.
 def accel_handler(addr, tags, stuff, source):
-    global samples # horrible thing to do
 
-    samples += 1
+    global videoMux
 
-    #print "---"
-    #print "received new osc msg from %s" % OSC.getUrlStr(source)
-    #print "with addr : %s" % addr
-    #print "typetags %s" % tags
-    #print "data %s" % stuff
-    #print "---"
+    videoMux.samples += 1
 
     # store x accel data
-    xData.append(stuff[1])
-    #print xData
+    videoMux.xData.append(stuff[1])
 
-    if (samples == SAMPLE_TIME):
-        cycleVideo() # communicate with ardunio
-        samples = 0
+    if (videoMux.samples == videoMux.SAMPLE_TIME):
+        videoMux.cycleVideo() # communicate with ardunio
+        videoMux.samples = 0
+
+class VideoMux(object):
+
+    def __init__(self, receiveAddress, ardunioPort):
+        self.receiveAddress = receiveAddress
+        self.SLEEP_TIME = 1
+        self.SAMPLE_TIME = 50
+        self.MAX_VIDEO = 8
+        self.WINDOW_SIZE = 50
+        self.SER_PORT = ardunioPort
+        self.SER_BAUD = 9600
+        self.SER_TIMEOUT = 3 # sec
+        self.MAXLINE = 32
+        self.THRESHOLD = .25
+        self.samples = 0
+        
+        # List to store accelerometer data
+        self.xData = collections.deque(maxlen=self.WINDOW_SIZE)
+        
+        self.currentVideo = 0 
+        
+        self.s = OSC.OSCServer(receiveAddress)
+
+        self.setupSerial()
+        self.setupOSC()
 
 
-s.addMsgHandler("/accxyz", accel_handler) # adding our function
+    def main(self):
+        try :
+            while 1 :
+                time.sleep(self.SLEEP_TIME)
+
+        except KeyboardInterrupt :
+            print "\nClosing OSCServer."
+            self.s.close()
+            print "Waiting for Server-thread to finish"
+            self.st.join()
+            print "Done"
+
+    def setupOSC(self):
+        "install handelers"
+
+        # this registers a 'default' handler (for unmatched messages), 
+        # an /'error' handler, an '/info' handler.
+        # And, if the client supports it, a '/subscribe' & '/unsubscribe' handler
+        self.s.addDefaultHandlers()
+        self.s.addMsgHandler("/accxyz", accel_handler) # adding our function
+
+        # just checking which handlers we have added
+        print "Registered Callback-functions are :"
+        for addr in self.s.getOSCAddressSpace():
+            print addr
+
+        # Start OSCServer
+        print "\nStarting OSCServer. Use ctrl-C to quit."
+        self.st = threading.Thread( target = self.s.serve_forever )
+        self.st.start()
+
+    def setupSerial(self):
+        "install the serial port to communicate with Ardunio"
+
+        # Arduino Serial Com
+        self.ser = serial.Serial()
+        self.ser.baudrate   = self.SER_BAUD
+        self.ser.port       = self.SER_PORT
+        self.ser.timeout    = self.SER_TIMEOUT
+        print "Trying port", self.ser.port
+        try:
+            self.ser.open()
+        except:
+            print "Ardunio not connected. Exiting"
+            #exit(0)
+
+    def cycleVideo(self):
+        "cylce video on the ardunio by sending it the channel"
+
+        # take mean to reduce noise
+        self.xVal = mean(self.xData)
+        print self.xVal
+
+        self.determineChannel()
+
+        print "Current Video:", self.currentVideo
+
+        # write to ardunio
+        if (self.ser.isOpen()):
+            self.ser.write(currentVideo)
+        else:
+            print "Serial disconnected"
+            #exit(0)
+
+    def determineChannel(self):
+        "determine which channel to send to ardunio"
+        currentVideo = self.currentVideo 
+
+        # decide increment up/down for video based on threshold
+        if (self.xVal >= self.THRESHOLD):
+            currentVideo += 1
+        if (self.xVal <= -self.THRESHOLD):
+            currentVideo -= 1
+
+        # loop back around if overflow of video number
+        if (currentVideo >= self.MAX_VIDEO): 
+            currentVideo = 0
+        elif (currentVideo < 0):
+            currentVideo = self.MAX_VIDEO-1
+
+        self.currentVideo = currentVideo
 
 
-# just checking which handlers we have added
-print "Registered Callback-functions are :"
-for addr in s.getOSCAddressSpace():
-    print addr
-
-
-# Start OSCServer
-print "\nStarting OSCServer. Use ctrl-C to quit."
-st = threading.Thread( target = s.serve_forever )
-st.start()
-
-
-try :
-    while 1 :
-        time.sleep(SLEEP_TIME)
-
-except KeyboardInterrupt :
-    print "\nClosing OSCServer."
-    s.close()
-    print "Waiting for Server-thread to finish"
-    st.join()
-    print "Done"
+# Run the script
+videoMux = VideoMux(receiveAddress,ardunioPort)
+videoMux.main()
