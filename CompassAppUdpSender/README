@@ -1,0 +1,6 @@
+Simple example Android App that reads the orientation of the phone (as a compass) and sends the readings (a float number between 0.0 and 360.0) periodically through a UDP socket to a user-specified IP, on port 4000.
+
+Based on code from:
+
+http://www.javacodegeeks.com/2013/09/android-compass-code-example.html
+http://stackoverflow.com/questions/12652261/how-to-use-udp-sockets-in-android
