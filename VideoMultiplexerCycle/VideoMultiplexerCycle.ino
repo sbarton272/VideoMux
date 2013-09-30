@@ -31,14 +31,10 @@ void loop() {
 
   int channel;
 
-  // check if data has been sent from the computer:
-  if (Serial.available()) {
-    // read the most recent byte and convert to int:
-    channel = Serial.parseInt();
-    //Serial.print("Switching to channel: ");
-    Serial.println(channel);
-    chooseVideoOutput(channel);
-  }
+  for(int i=0 ; i < NUM_CHANNELS; i++){
+      chooseVideoOutput(channel);
+      Serial.print(i);
+  }  
 
 }
 
