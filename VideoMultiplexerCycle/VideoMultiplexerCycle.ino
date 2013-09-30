@@ -29,11 +29,9 @@ void setup() {
 
 void loop() {
 
-  int channel;
-
   for(int i=0 ; i < NUM_CHANNELS; i++){
-      chooseVideoOutput(channel);
-      //Serial.println(i);
+      chooseVideoOutput(i);
+      Serial.println(i);
       delay(100);
   }  
 
@@ -56,6 +54,12 @@ int chooseVideoOutput(int channel){
   setPinMode(pinS0, S0);
   setPinMode(pinS1, S1);
   setPinMode(pinS2, S2);
+  
+  Serial.print(S0);
+  Serial.print(S1);
+  Serial.print(S2);
+  Serial.print('\n');
+  
 
 }
 
