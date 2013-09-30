@@ -1,12 +1,4 @@
-/* LED Blink, Teensyduino Tutorial #1
- http://www.pjrc.com/teensy/tutorial.html
- 
- This example code is in the public domain.
- */
 
-// Teensy 2.0 has the LED on pin 11
-// Teensy++ 2.0 has the LED on pin 6
-// Teensy 3.0 has the LED on pin 13
 const int ledPin = 13;
 const int pinS0 = 2;
 const int pinS1 = 3;
@@ -28,7 +20,7 @@ void setup() {
   digitalWrite(pinEN, LOW);   // set the LED on ???
   chooseVideoOutput(0);
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("Online");
 }
 
@@ -43,7 +35,7 @@ void loop() {
   if (Serial.available()) {
     // read the most recent byte and convert to int:
     channel = Serial.parseInt();
-    Serial.print("Switching to channel: ");
+    //Serial.print("Switching to channel: ");
     Serial.println(channel);
     chooseVideoOutput(channel);
   }
