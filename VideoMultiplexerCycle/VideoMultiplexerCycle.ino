@@ -33,7 +33,8 @@ void loop() {
 
   for(int i=0 ; i < NUM_CHANNELS; i++){
       chooseVideoOutput(channel);
-      Serial.print(i);
+      //Serial.println(i);
+      delay(100);
   }  
 
 }
